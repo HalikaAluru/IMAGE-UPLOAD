@@ -1,0 +1,133 @@
+html
+''''''''''''''''''''''''''
+
+<form action="">
+  <label for="files">Select multiple files: </label>
+  <input id="files" type="file" multiple  (change)="onFileSelected ($event)"/>
+ <input type="submit" class="btn btn-primary" (click)="upload()" value="upload">
+ <input type="reset" class="btn btn-primary" value="clear">
+ <!-- <div *ngFor="let image of images_array">
+    <img width="30px" height="30px" src="{{image }}" id="result" alt=""></div> -->
+    
+
+
+</form>
+<div>
+  <span id="container" *ngFor="let image of images_array;let i =index">
+  
+    <i id = "x" class="fa fa-times" aria-hidden="true" (click)="removeimage(i)"></i>
+    
+    <img width="60px" height="60px" [src]=image id="result" alt="">
+
+  </span>
+</div>
+
+
+component.ts
+''''''''''''''''''''''''
+
+imageChangedEvent
+  profileImage = []
+  url
+  images_array: any = []
+  onFileSelected(event: any) {
+
+    if (event.target.files.length) {
+
+
+      this.profileImage = event.target.files
+
+      for (let i = 0; i < this.profileImage.length; i++) {
+
+        debugger
+        var file=this.profileImage[i]
+        var reader = new FileReader();
+        reader.readAsDataURL(file); // read file as data url
+        reader.onload = (ev: any) => { // called once readAsDataURL is completed
+          this.images_array[i] = ev.target.result;
+        debugger
+
+          //this.imgsrc=this.profileImage;
+
+        }
+
+
+      }
+
+    }
+
+   
+  }
+  removeimage(i:number)
+  {
+   
+   this.images_array.splice(i,1)
+
+  }
+  upload() {
+    for (let index = 0; index < this.images_array.length; index++) {
+      this.images_array[index] = this.images_array[index].replace("data:image/jpeg;base64,", "");
+
+    }
+
+    this.ratingService.uploadimage(this.images_array).subscribe(data => {
+      this.images_array=[]
+
+    })
+  }
+
+
+service
+''''''''''''''''''''''''''''''''''''''''
+
+
+  uploadimage(images)
+  {
+ debugger
+    return this.http.post(this.BaseApiurl + '/rating/savegalary/?AuthToken=' + this.AuthToken,
+      {
+      image:images
+        
+      })
+      .map(this.extractData)
+      .catch(this.handleError); 
+ }
+
+
+
+.js
+''''''''''''''''''''''''''''''''
+
+
+router.post('/savegalary', function (req, res) {
+    console.log('save image')
+    var data = []
+    data=req.body.image
+    for (let i = 0; i < data.length; i++) {
+
+
+
+        var pt = '';
+        var dt = new Date();
+        ptr = dt.getFullYear() + "" + dt.getMonth() + "" + dt.getMilliseconds()+ "" +i + '.jpg' ;
+        pts = './public/test/' + ptr;
+        fs.writeFile(pts, data[i], 'base64', (err) => {
+            if (err)
+                console.log(err)
+            else {
+                console.log('Image Svaed Success...');
+            }
+
+        })
+    }
+
+
+
+
+
+
+
+
+
+
+
